@@ -22,8 +22,12 @@ import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 public class Filler {
-	private CaptchaService captchaService = null;
+	private CaptchaService captchaService = new CaptchaServiceRuoKuaiImpl();
+	WebDriver driver = new FirefoxDriver();
 
+	public Filler() {
+		
+	}
 	public CaptchaService getCaptchaService() {
 		return captchaService;
 	}
@@ -59,8 +63,7 @@ public class Filler {
 		// System.setProperty("webdriver.firefox.bin",
 		// "D:\\Program Files\\Mozilla Firefox\\firefox.exe");
 		// 创建一个 FireFox 的浏览器实例
-		WebDriver driver = new FirefoxDriver();
-
+		
 		// 让浏览器访问 Baidu
 		driver.get(url);
 		// 用下面代码也可以实现
@@ -84,12 +87,7 @@ public class Filler {
 		WebElement elSelCity = driver.findElement(By.id("selectCity"));
 //		driver.findElement(By.id("city")).sendKeys(values.get("city"));
 		driver.findElement(By.id("city")).click();
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+
 		JavascriptExecutor js = (JavascriptExecutor) driver;
 
 		List<WebElement> elCityList = elSelCity.findElements(By.tagName("a"));
@@ -124,15 +122,20 @@ public class Filler {
 		}
 
 		// 提交 input 所在的 form
-		// elVehicleType.submit();
+		elBrand.submit();
 
 		// 通过判断 title 内容等待搜索页面加载完毕，间隔10秒
-		(new WebDriverWait(driver, 10)).until(new ExpectedCondition<Boolean>() {
-			public Boolean apply(WebDriver d) {
-				return d.getTitle().toLowerCase().endsWith("ztree");
-			}
-		});
-
+//		(new WebDriverWait(driver, 10)).until(new ExpectedCondition<Boolean>() {
+//			public Boolean apply(WebDriver d) {
+//				return d.getTitle().toLowerCase().endsWith("ztree");
+//			}
+//		});
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		// 显示搜索结果页面的 title
 		System.out.println("2 Page title is: " + driver.getTitle());
 
