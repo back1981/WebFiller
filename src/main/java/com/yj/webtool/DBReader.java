@@ -29,10 +29,12 @@ public class DBReader {
 			String id = rs.getString("ID");
 			String city = rs.getString("city");
 			String mobile = rs.getString("mobile");
+			String carType = rs.getString("carType");
 			values.put("name", name);
 			values.put("id", id);
 			values.put("city", city);
 			values.put("cel_num", mobile);
+			values.put("brand", carType);
 			retval.add(values);
 		}
 		return retval;
