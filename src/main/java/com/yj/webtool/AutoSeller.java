@@ -39,6 +39,10 @@ public class AutoSeller {
 
 	public BufferedImage getAutoCodeImg(WebDriver driver) {
 		try {
+			if(!driver.findElement(By.id("checkCodeUl")).isDisplayed()) {
+				return null;
+			}
+			
 			byte[] arrScreen = ((TakesScreenshot) driver)
 					.getScreenshotAs(OutputType.BYTES);
 			BufferedImage imageScreen = ImageIO.read(new ByteArrayInputStream(
@@ -62,6 +66,9 @@ public class AutoSeller {
 	}
 	
 	public void autoSell(String url, List<Map<String, String>> sellerList) throws Exception {
+		if(sellerList == null || sellerList.size() == 0) {
+			return;
+		}
 		List<Map<String, String>> retryList = new LinkedList<Map<String, String>>();
 		for(Map<String, String> sellerInfo: sellerList) {
 			try {
@@ -70,7 +77,7 @@ public class AutoSeller {
 				retryList.add(sellerInfo);
 			} 
 		}
-		autoSell(url, sellerList);
+		autoSell(url, retryList);
 	}
 
 	public boolean autoSell(String url, Map<String, String> sellerInfo) throws Exception {
@@ -107,7 +114,7 @@ public class AutoSeller {
 		JavascriptExecutor js = (JavascriptExecutor) driver;
 
 		List<WebElement> elCityList = elSelCity.findElements(By.tagName("a"));
-		
+		boolean cityMatched = false;
 		for (WebElement elCity : elCityList) {
 //			System.out.println("id" + elCity.getAttribute("id"));
 //			System.out.println("text:" + elCity.getText());
@@ -115,9 +122,14 @@ public class AutoSeller {
 			String city = elCity.getAttribute("innerHTML");
 			if (city.equals(sellerInfo.get("city"))) {
 //				elCity.click();
-				 js.executeScript("document.getElementById('" + elCity.getAttribute("id") +"').click()");
+				logger.debug("city=" + city + ",clickid=" + elCity.getAttribute("id"));
+				cityMatched = true;
+				js.executeScript("document.getElementById('" + elCity.getAttribute("id") +"').click()");
 				break;
 			}
+		}
+		if(!cityMatched) {
+			driver.findElement(By.id("city")).click();
 		}
 
 		WebElement elBrand = driver.findElement(By.id("brand"));
@@ -153,28 +165,32 @@ public class AutoSeller {
 //			}
 //		});
 		try {
-			Thread.sleep(5000);
+			Thread.sleep(Integer.parseInt(Config.getInstance().getProp("waittime")));
 		} catch (InterruptedException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		
-		handleModelDialog(driver);
+		String alertMsg = handleModelDialog(driver);
 		// 显示搜索结果页面的 title
 		//System.out.println("2 Page title is: " + driver.getTitle());
+		System.out.println("url:" + driver.getCurrentUrl());
 		boolean result = driver.getCurrentUrl().endsWith("sellcar/express.html");
-		logger.info(sellerInfo + ", result=" + result);
+		logger.info(sellerInfo + ", result=" + result + ", msg=" + alertMsg);
 		return result;
 		// 关闭浏览器
 		// driver.quit();
 	}
 	
-	private void handleModelDialog(WebDriver driver) {
+	private String handleModelDialog(WebDriver driver) {
+		String alertMsg = null;
 		try {
+			alertMsg = driver.switchTo().alert().getText();
 			driver.switchTo().alert().accept();
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
+		return alertMsg;
 		
 	}
 	
