@@ -78,6 +78,8 @@ public class AutoSeller {
 			} 
 		}
 		autoSell(url, retryList);
+		// 关闭浏览器
+		driver.quit();
 	}
 
 	public boolean autoSell(String url, Map<String, String> sellerInfo) throws Exception {
@@ -93,7 +95,7 @@ public class AutoSeller {
 		// driver.navigate().to("http://www.baidu.com");
 		closeLayer(driver);
 		// 获取 网页的 title
-		System.out.println("1 Page title is: " + driver.getTitle());
+		//System.out.println("1 Page title is: " + driver.getTitle());
 
 		// 通过 id 找到 input 的 DOM
 		// WebElement elVehicleType = driver.findElement(By.id("vehicleType"));
@@ -177,9 +179,15 @@ public class AutoSeller {
 		System.out.println("url:" + driver.getCurrentUrl());
 		boolean result = driver.getCurrentUrl().endsWith("sellcar/express.html");
 		logger.info(sellerInfo + ", result=" + result + ", msg=" + alertMsg);
+		SubmitStatus status = null;
+		if(result) {
+			status = SubmitStatus.SUCC;
+		} else {
+			status = SubmitStatus.FAILED;
+		}
+		new DBReader().updateStatus(status, sellerInfo.get("cel_num"));
 		return result;
-		// 关闭浏览器
-		// driver.quit();
+
 	}
 	
 	private String handleModelDialog(WebDriver driver) {

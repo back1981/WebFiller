@@ -26,18 +26,34 @@ public class DBReader {
 		while(rs.next()) {
 			Map<String, String> values = new HashMap<String, String>();
 			String name = rs.getString("sellername");
-			String id = rs.getString("ID");
 			String city = rs.getString("city");
 			String mobile = rs.getString("mobile");
 			String carType = rs.getString("carType");
 			values.put("name", name);
-			values.put("id", id);
 			values.put("city", city);
 			values.put("cel_num", mobile);
 			values.put("brand", carType);
 			retval.add(values);
 		}
 		return retval;
+		} finally {
+			try {
+				con.close();
+			} catch(Exception e) {
+				
+			}
+		}
+	}
+	
+	public void updateStatus(SubmitStatus status, String id) throws Exception {
+		Connection con = null;
+		try {
+			con = createConnection();
+			String sql = Config.getInstance().getProp("update_sql");
+			PreparedStatement  stmt = con.prepareStatement(sql);
+			stmt.setInt(1, status.getStatus());
+			stmt.setString(2, id);
+			stmt.executeUpdate();
 		} finally {
 			try {
 				con.close();
