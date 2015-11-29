@@ -9,6 +9,9 @@ import javax.imageio.ImageIO;
 
 import org.junit.Test;
 
+import com.yj.webtool.webdriver.CaptchaServiceRuoKuaiImpl;
+import com.yj.webtool.webdriver.Config;
+
 public class CaptchaServiceRuoKuaiImplTest {
 
 	@Test

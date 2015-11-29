@@ -1,4 +1,4 @@
-package com.yj.webtool;
+package com.yj.webtool.webdriver;
 
 public class CaptcharSolveException extends Exception {
 	public CaptcharSolveException(String msg) {

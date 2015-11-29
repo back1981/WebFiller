@@ -5,11 +5,15 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import com.yj.webtool.webdriver.AutoSeller;
+import com.yj.webtool.webdriver.CaptcharSolveException;
+import com.yj.webtool.webdriver.Config;
+
 
 public class FillerTest {
 	@Test
 	public void fillTest(){
-		Config.getInstance().init("F:\\studio\\webtool_workspace\\webtool\\src\\test\\resources\\config.properties");
+		Config.getInstance().init("D:\\studio\\projects\\WebFiller\\src\\test\\resources\\config.properties");
 		AutoSeller filler = new AutoSeller();
 		long phone = 13911111107L;
 		for(int i = 0; i < 3;i++) {

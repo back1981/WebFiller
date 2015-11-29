@@ -1,4 +1,4 @@
-package com.yj.webtool;
+package com.yj.webtool.webdriver;
 
 import java.awt.image.BufferedImage;
 
