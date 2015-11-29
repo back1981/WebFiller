@@ -1,15 +1,25 @@
 package com.yj.webtool;
 
+import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
 
 import org.apache.log4j.Logger;
 
 import com.yj.webtool.highperf.AutoSellerHighPerfImpl;
+import com.yj.webtool.mail.MailTimerTask;
 import com.yj.webtool.webdriver.Config;
 import com.yj.webtool.webdriver.DBReader;
 
 public class Main {
+	public static void startMailTask() {
+		Calendar cal = Calendar.getInstance();
+//		cal.add(Calendar.HOUR, 1);
+		long mailInterval = Long.parseLong(Config.getInstance().getProp("mailInterval")) * 1000;
+		new Timer().schedule(new MailTimerTask(), cal.getTime(), mailInterval);
+	}
+	
 	
 	public static void main(String[] args) {
 		Logger logger = Logger.getLogger(Main.class);
@@ -20,6 +30,8 @@ public class Main {
 			}
 			String configFilePath = args[0];
 			Config.getInstance().init(configFilePath);
+			Main.startMailTask();
+			
 //			Config.getInstance().init("F:\\studio\\webtool_workspace\\webtool\\src\\test\\resources\\config.properties");
 			System.setProperty("webdriver.firefox.bin", Config.getInstance().getProp("firefox"));
 //			System.setProperty("webdriver.chrome.driver", Config.getInstance().getProp("chrome"));

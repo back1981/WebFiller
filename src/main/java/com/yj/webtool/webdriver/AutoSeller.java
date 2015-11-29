@@ -194,7 +194,8 @@ public class AutoSeller implements IAutoSeller{
 		} else {
 			alertMsg = strResult;
 		}
-		logger.info(sellerInfo + ", result=" + result + ", msg=" + alertMsg);
+		
+		logger.info(sellerInfo + ",  result=" + result + ", msg=" + alertMsg);
 		SubmitStatus status = null;
 		if (result) {
 			status = SubmitStatus.SUCC;

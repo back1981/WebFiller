@@ -12,7 +12,8 @@ import com.yj.webtool.webdriver.SubmitStatus;
 
 public class AutoSellerHighPerfImpl implements IAutoSeller{
 	Logger logger = Logger.getLogger(AutoSeller.class);
-	
+	public static long succ = 0;
+	public static long failed = 0;
 	Seller seller = new Seller();
 	private OnlineForm makeForm(Map<String, String> sellerInfo) {
 		OnlineForm form = new OnlineForm();
@@ -38,10 +39,12 @@ public class AutoSellerHighPerfImpl implements IAutoSeller{
 				seller.handleServerTime(form);
 				seller.appointment(form);
 				seller.submit(form);
+				succ++;
 			} catch (Exception e) {
 //				e.printStackTrace();
 				status = SubmitStatus.FAILED;
 				alertMsg = e.getMessage();
+				failed++;
 			}
 			logger.info(sellerInfo + ", result=" + status + ", msg=" + alertMsg);
 			new DBReader().updateStatus(status, sellerInfo.get("cel_num"));
