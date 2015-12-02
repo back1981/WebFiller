@@ -2,6 +2,7 @@ package com.yj.webtool.highperf;
 
 import javax.ws.rs.core.MultivaluedMap;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -16,7 +17,7 @@ public class Seller {
 	Logger logger = Logger.getLogger(Seller.class);
 	String CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 	Client client = Client.create();
-	String sessionKey = null;
+//	String sessionKey = null;
 
 //	public void parser(String url) {
 //		try {
@@ -46,9 +47,9 @@ public class Seller {
 	public void appointment(OnlineForm form) throws Exception {
 		WebResource webResource = client
 				.resource("http://gw2.pahaoche.com/wghttp/internal/appointment?sessionKey="
-						+ sessionKey);
+						+ form.getSessionKey());
 		MultivaluedMap params = new MultivaluedMapImpl();
-		params.add("sessionKey", sessionKey);
+		params.add("sessionKey", form.getSessionKey());
 		params.add("yuyueId", "");
 		params.add("channel", "yy-mishixinxi-150928");
 		params.add("from", "GW");
@@ -59,8 +60,10 @@ public class Seller {
 		params.add("mobile", form.getMobile());
 		params.add("city", form.getCity());
 		params.add("vehicleType", form.getVehicleType());
+		params.add("_", String.valueOf(System.currentTimeMillis()));
+		params.add("jsonpCallback", "jQuery18306295672522392124_1449055499431");
 		ClientResponse response = webResource.queryParams(params)
-				.accept("application/json").get(ClientResponse.class);
+				.accept("*/*").get(ClientResponse.class);
 
 		if (response.getStatus() != 200) {
 			throw new RuntimeException("Failed : HTTP error code : "
@@ -68,7 +71,8 @@ public class Seller {
 		}
 
 		String output = response.getEntity(String.class);
-
+		output = output.replace("jQuery18306295672522392124_1449055499431(", "");
+		output = StringUtils.removeEnd(output, ")");
 		AppointmentResponse objResponse = (AppointmentResponse) GsonUtils
 				.fromJson(output, AppointmentResponse.class);
 		if ("false".equalsIgnoreCase(objResponse.getResult())) {
@@ -80,20 +84,17 @@ public class Seller {
 
 	}
 
-	public String refreshCheckCode() {
+	public void refreshCheckCode(OnlineForm form) {
 		WebResource webResource = client
 				.resource("http://gw2.pahaoche.com/wghttp/randomImageServlet?Rand=4&sessionKey="
-						+ sessionKey);
-		ClientResponse response = webResource.accept("application/json").get(
+						+ form.getSessionKey());
+		ClientResponse response = webResource.accept("image/webp,image/*,*/*;q=0.8").get(
 				ClientResponse.class);
 
 		if (response.getStatus() != 200) {
 			throw new RuntimeException("Failed : HTTP error code : "
 					+ response.getStatus());
 		}
-
-		return sessionKey;
-
 	}
 
 	public String uuid() {
@@ -151,11 +152,23 @@ public class Seller {
 		params.add("mobile", form.getMobile());
 		params.add("city", form.getCity());
 		params.add("vehicleType", form.getVehicleType());
+		params.add("authCode", "");
+//		params.add("_", form.getVehicleType());
+//		params.add("jsonpCallback", "jQuery18306295672522392124_1449055499431");
 		WebResource webResource = client
 				.resource("http://www.pahaoche.com/sellcar/express.html");
 		ClientResponse response = webResource.type("application/x-www-form-urlencoded") .post(ClientResponse.class, params);
 //		String output = response.getEntity(String.class);
 //		System.out.println(output);
+	}
+	
+	public void getYuYueQuery(OnlineForm form) {
+		MultivaluedMap params = new MultivaluedMapImpl();
+		params.add("ch", "yy-mishixinxi-150928");
+		params.add("mobile",form.getMobile());
+		WebResource webResource = client
+				.resource("http://www.pahaoche.com/getYuYueQuery.w");
+		ClientResponse response = webResource.type("application/x-www-form-urlencoded") .post(ClientResponse.class, params);
 	}
 
 	public static void main(String[] args) {
@@ -174,6 +187,8 @@ public class Seller {
 		parse.handleServerTime(form);
 		try {
 			parse.appointment(form);
+			parse.getYuYueQuery(form);
+			parse.refreshCheckCode(form);
 			parse.submit(form);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -181,3 +196,4 @@ public class Seller {
 		}
 	}
 }
+

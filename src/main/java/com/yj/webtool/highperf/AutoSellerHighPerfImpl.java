@@ -11,7 +11,7 @@ import com.yj.webtool.webdriver.DBReader;
 import com.yj.webtool.webdriver.SubmitStatus;
 
 public class AutoSellerHighPerfImpl implements IAutoSeller{
-	Logger logger = Logger.getLogger(AutoSeller.class);
+	Logger logger = Logger.getLogger(AutoSellerHighPerfImpl.class);
 	public static long succ = 0;
 	public static long failed = 0;
 	Seller seller = new Seller();
@@ -37,8 +37,10 @@ public class AutoSellerHighPerfImpl implements IAutoSeller{
 			
 			try {
 				seller.handleServerTime(form);
-				seller.appointment(form);
-				seller.submit(form);
+				parse.appointment(form);
+				parse.getYuYueQuery(form);
+				parse.refreshCheckCode(form);
+				parse.submit(form);
 				succ++;
 			} catch (Exception e) {
 //				e.printStackTrace();
