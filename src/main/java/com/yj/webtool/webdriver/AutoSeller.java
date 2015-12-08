@@ -7,6 +7,7 @@ import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import javax.imageio.ImageIO;
 
@@ -19,26 +20,33 @@ import org.openqa.selenium.Point;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.ie.InternetExplorerDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.yj.webtool.IAutoSeller;
 
-public class AutoSeller implements IAutoSeller{
-	Logger logger = Logger.getLogger(AutoSeller.class);
+public class AutoSeller implements IAutoSeller {
+	private static final Logger logger = Logger.getLogger(AutoSeller.class);
 	private CaptchaService captchaService = new CaptchaServiceRuoKuaiImpl();
-	
+
 	WebDriver driver = null;
 
 	// WebDriver driver = new HtmlUnitDriver();
 
 	public AutoSeller() {
 		long start = System.currentTimeMillis();
-		driver = new FirefoxDriver();
-//		driver = new InternetExplorerDriver();
-		logger.info("open firefox cost time:" + (System.currentTimeMillis() - start));
+//		FirefoxProfile firefoxProfile = new FirefoxProfile();
+//		firefoxProfile.setAcceptUntrustedCertificates(true);
+//		firefoxProfile.setEnableNativeEvents(false);
+//		firefoxProfile.setPreference("webdriver.load.strategy", "unstable");
+//		firefoxProfile.setPreference("app.update.enabled", false);
+//		 driver = new FirefoxDriver(firefoxProfile);
+		// driver = new InternetExplorerDriver();
+		driver = new ChromeDriver();
+
+		logger.info("open firefox cost time:"
+				+ (System.currentTimeMillis() - start));
 	}
 
 	public CaptchaService getCaptchaService() {
@@ -83,7 +91,7 @@ public class AutoSeller implements IAutoSeller{
 			if (sellerList == null || sellerList.size() == 0) {
 				return;
 			}
-			
+
 			List<Map<String, String>> retryList = new LinkedList<Map<String, String>>();
 			for (Map<String, String> sellerInfo : sellerList) {
 				try {
@@ -92,7 +100,7 @@ public class AutoSeller implements IAutoSeller{
 					retryList.add(sellerInfo);
 				}
 			}
-			autoSell(url, retryList);
+			//autoSell(url, retryList);
 		} finally {
 			// 关闭浏览器
 			driver.quit();
@@ -108,108 +116,123 @@ public class AutoSeller implements IAutoSeller{
 		// 创建一个 FireFox 的浏览器实例
 
 		// 让浏览器访问 Baidu
-
-		long start = System.currentTimeMillis();
-		driver.get(url);
-		logger.info("open url cost time:" + (System.currentTimeMillis() - start));
-
-//		JavascriptExecutor js = (JavascriptExecutor) driver;
-//		js.executeScript("return window.stop");
-//		logger.info("stop window cost time:" + (System.currentTimeMillis() - start));
-//		waitSubmitButton();
-		
-		// 用下面代码也可以实现
-		// driver.navigate().to("http://www.baidu.com");
-		closeLayer(driver);
-		// 获取 网页的 title
-		// System.out.println("1 Page title is: " + driver.getTitle());
-
-		// 通过 id 找到 input 的 DOM
-		// WebElement elVehicleType = driver.findElement(By.id("vehicleType"));
-
-		// 输入关键字
-		// elVehicleType.sendKeys(values.get("vehicleType"));
-
-		WebElement elName = driver.findElement(By.id("name"));
-		elName.clear();
-		elName.sendKeys(sellerInfo.get("name"));
-
-		WebElement elPhone = driver.findElement(By.id("cel_num"));
-		elPhone.clear();
-		elPhone.sendKeys(sellerInfo.get("cel_num"));
-
-		selectCity(sellerInfo);
-
-		WebElement elBrand = driver.findElement(By.id("brand"));
-		elBrand.clear();
-		elBrand.sendKeys(sellerInfo.get("brand"));
-
-		selectTime();
-		BufferedImage img = getAutoCodeImg(driver);
-		if (img != null) {
+		try {
+			long start = System.currentTimeMillis();
 			try {
-				ImageIO.write(img, "png", new File(Config.getInstance()
-						.getProp("captcha_snapshot_dir")
-						+ File.separator
-						+ "auth.png"));
-				String captcha = captchaService.solve(img);
+				driver.manage().timeouts().pageLoadTimeout(3, TimeUnit.SECONDS);
+				driver.manage().timeouts().implicitlyWait(3, TimeUnit.SECONDS);
+				if(url.equals(driver.getCurrentUrl())) {
+					driver.navigate().refresh();
+				} else {
+					driver.navigate().to(url);
+				}
 
-				WebElement elAuth = driver.findElement(By.id("auth"));
-				elAuth.clear();
-				elAuth.sendKeys(captcha);
-			} catch (CaptcharSolveException e) {
-				logger.error("solve captcha failed", e);
-				throw e;
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				logger.error("", e);
+
+			}
+			logger.info("open url cost time:"
+					+ (System.currentTimeMillis() - start));
+
+			// JavascriptExecutor js = (JavascriptExecutor) driver;
+			// js.executeScript("return window.stop");
+			// logger.info("stop window cost time:" +
+			// (System.currentTimeMillis() - start));
+			// waitSubmitButton();
+
+			// 用下面代码也可以实现
+			// driver.navigate().to("http://www.baidu.com");
+			closeLayer(driver);
+			// 获取 网页的 title
+			// System.out.println("1 Page title is: " + driver.getTitle());
+
+			// 通过 id 找到 input 的 DOM
+			// WebElement elVehicleType =
+			// driver.findElement(By.id("vehicleType"));
+
+			// 输入关键字
+			// elVehicleType.sendKeys(values.get("vehicleType"));
+
+			WebElement elName = driver.findElement(By.id("name"));
+			elName.clear();
+			elName.sendKeys(sellerInfo.get("name"));
+
+			WebElement elPhone = driver.findElement(By.id("cel_num"));
+			elPhone.clear();
+			elPhone.sendKeys(sellerInfo.get("cel_num"));
+
+			selectCity(sellerInfo);
+
+			WebElement elBrand = driver.findElement(By.id("brand"));
+			elBrand.clear();
+			elBrand.sendKeys(sellerInfo.get("brand"));
+
+			selectTime();
+			BufferedImage img = getAutoCodeImg(driver);
+			if (img != null) {
+				try {
+					ImageIO.write(img, "png", new File(Config.getInstance()
+							.getProp("captcha_snapshot_dir")
+							+ File.separator
+							+ "auth.png"));
+					String captcha = captchaService.solve(img);
+
+					WebElement elAuth = driver.findElement(By.id("auth"));
+					elAuth.clear();
+					elAuth.sendKeys(captcha);
+				} catch (CaptcharSolveException e) {
+					logger.error("solve captcha failed", e);
+					throw e;
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					logger.error("", e);
+				}
+
 			}
 
-		}
+			// 提交 input 所在的 form
+			// elBrand.submit();
+			driver.findElement(By.id("saveOnline")).click();
 
-		// 提交 input 所在的 form
-		// elBrand.submit();
-		driver.findElement(By.id("saveOnline")).click();
+			// try {
+			// Thread.sleep(Integer.parseInt(Config.getInstance().getProp(
+			// "waittime")));
+			// } catch (InterruptedException e1) {
+			// // TODO Auto-generated catch block
+			// e1.printStackTrace();
+			// }
 
-
-//		try {
-//			Thread.sleep(Integer.parseInt(Config.getInstance().getProp(
-//					"waittime")));
-//		} catch (InterruptedException e1) {
-//			// TODO Auto-generated catch block
-//			e1.printStackTrace();
-//		}
-
-		
-//		String alertMsg = handleModelDialog(driver);
-//		boolean result = driver.getCurrentUrl()
-//				.endsWith("sellcar/express.html");
-		String strResult = checkResult();
-		boolean result = false;
-		String alertMsg = null;
-		if("true".equalsIgnoreCase(strResult)) {
-			result = true;
-			driver.navigate().back();
-		} else {
-			alertMsg = strResult;
-		}
-		
-		logger.info(sellerInfo + ",  result=" + result + ", msg=" + alertMsg);
-		SubmitStatus status = null;
-		if (result) {
-			status = SubmitStatus.SUCC;
-		} else {
-			status = SubmitStatus.FAILED;
-			if (alertMsg.contains("验证码错误")) {
-				status = SubmitStatus.CHECK_CODE_ERR;
+			// String alertMsg = handleModelDialog(driver);
+			// boolean result = driver.getCurrentUrl()
+			// .endsWith("sellcar/express.html");
+			String strResult = checkResult();
+			boolean result = false;
+			String alertMsg = null;
+			if ("true".equalsIgnoreCase(strResult)) {
+				result = true;
+				// driver.navigate().back();
+			} else {
+				alertMsg = strResult;
 			}
-		}
-		new DBReader().updateStatus(status, sellerInfo.get("cel_num"));
-		long end = System.currentTimeMillis();
-		logger.info("submit a request coste cost time:" + (end - start));
-		return result;
 
+			logger.info(sellerInfo + ",  result=" + result + ", msg="
+					+ alertMsg);
+			SubmitStatus status = null;
+			if (result) {
+				status = SubmitStatus.SUCC;
+			} else {
+				status = SubmitStatus.FAILED;
+				if (alertMsg.contains("验证码错误")) {
+					status = SubmitStatus.CHECK_CODE_ERR;
+				}
+			}
+			new DBReader().updateStatus(status, sellerInfo.get("cel_num"));
+			long end = System.currentTimeMillis();
+			logger.info("submit a request coste cost time:" + (end - start));
+			return result;
+		} catch (Exception e) {
+			return false;
+		}
 	}
 
 	private String checkResult() {
@@ -219,9 +242,9 @@ public class AutoSeller implements IAutoSeller{
 			alertMsg = driver.switchTo().alert().getText();
 			driver.switchTo().alert().accept();
 		} catch (Exception e) {
-			boolean result = driver.getCurrentUrl()
-					.endsWith("sellcar/express.html");
-			if(result) {
+			boolean result = driver.getCurrentUrl().endsWith(
+					"sellcar/express.html");
+			if (result) {
 				return String.valueOf(result);
 			} else {
 				checkResult();
@@ -229,19 +252,18 @@ public class AutoSeller implements IAutoSeller{
 		}
 		return alertMsg;
 	}
-	
-	
+
 	private void selectCity(Map<String, String> sellerInfo) {
 		WebElement elSelCity = driver.findElement(By.id("selectCity"));
 		// driver.findElement(By.id("city")).sendKeys(values.get("city"));
 		WebElement elCity2 = driver.findElement(By.id("city"));
 		try {
 			elCity2.clear();
-		} catch(Exception e) {
-			
+		} catch (Exception e) {
+
 		}
 		elCity2.click();
-		
+
 		JavascriptExecutor js = (JavascriptExecutor) driver;
 
 		List<WebElement> elCityList = elSelCity.findElements(By.tagName("a"));
@@ -308,23 +330,21 @@ public class AutoSeller implements IAutoSeller{
 	 */
 	private void closeLayer(WebDriver driver) throws Exception {
 		try {
-//			Thread.sleep(20000);
+			// Thread.sleep(20000);
 			long start = System.currentTimeMillis();
-//			WebElement el = driver.findElement(By.cssSelector("#close1"));
+			// WebElement el = driver.findElement(By.cssSelector("#close1"));
 			WebElement el = driver.findElement(By.id("close1"));
-//			driver.findElements(By.id("close1"));
+			// driver.findElements(By.id("close1"));
 			long time1 = System.currentTimeMillis();
 			logger.info("close layer time cost:" + (time1 - start));
-//			WebElement el = driver.findElement(By.id("close1"));
-			
-
+			// WebElement el = driver.findElement(By.id("close1"));
 
 			el = el.findElement(By.tagName("area"));
-//			long time2 = System.currentTimeMillis();
-//			logger.info("close layer time cost:" + (time2 - time1));
+			// long time2 = System.currentTimeMillis();
+			// logger.info("close layer time cost:" + (time2 - time1));
 			el.click();
-//			logger.info("close layer time cost:"
-//					+ (System.currentTimeMillis() - time2));
+			// logger.info("close layer time cost:"
+			// + (System.currentTimeMillis() - time2));
 		} catch (Exception e) {
 
 		}
